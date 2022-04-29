@@ -48,7 +48,6 @@ E.g. to install hipsycl
 source manage_hipsycl.sh install
 ```
 and to uninstall it
-to install hipsycl
 ```bash
 source manage_hipsycl.sh uninstall
 ```
