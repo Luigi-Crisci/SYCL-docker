@@ -40,7 +40,7 @@ where
 - *--gpus=all* add all the gpu found in the system to the container
 
 ## Select backend
-hipSYCL and DPC++ have different headers files, so it is better to not enable them togheter
+hipSYCL and DPC++ have different headers files, so it is better to not enable them togheter  
 In the container you will find two files in your $HOME folder, `manage_dpcpp.sh` and `manage_hipsycl.sh`, which can install and uninstall the corresponding backend.  
 
 E.g. to install hipsycl
