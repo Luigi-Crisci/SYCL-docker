@@ -29,6 +29,8 @@ A detailed guide on how to enable CUDA support for containers can be found [here
   - Only Windows 10 Inside preview and Windows 11 are supported
   -  To run CUDA, you will need a working **WSL 2** installation. If you already have a WSL 1 installation, you can upgrade it by typing `wsl --set-version <Distro> 2`  
 Any linux distribution listed in the nvidia guide should work, but Ubuntu 20.04 is preferred. Note that nvidia driver on Windows already contains the one for WSL, so **DO NOT** install the Nvidia driver on WSL as conflicts will arise. 
+  - Install Docker Desktop on windows and **DO NOT** install docker on the WSL explicitly.
+  - Turn on the Docker WSL2 backend in docker desktop under *settings* -> *general* -> *use the WSL2 based engine*. If your selected distro is also the default one, no other steps are needed. In the other case, you will have to enable the WSL integration under *settings* -> *Resources* -> *WSL integration*
 
 ### Run the container
 To run the container, type
