@@ -53,4 +53,35 @@ and to uninstall it
 ```bash
 source manage_hipsycl.sh uninstall
 ```
-Do NOT enable both backend togheter as it could brick the container (Not tested, feel free to make a try)
+Do NOT enable both backend togheter as it could brick the container (Not tested, feel free to make a try)  
+
+## Building a SYCL app
+
+### Knowing our GPU capabilities
+Each Nvidia GPU comes with a specific CUDA capabilities, which you need to specify when building a SYCL app using the CUDA backend.  
+While you can easly check the CUDA capabilities for your device by checking your architecture online, [here](https://gist.github.com/Luigi-Crisci/08b8f76355476a68d34737611984bf5c) you can find simple app that queries it for you.
+
+### HipSYCL
+
+HipSYCL uses an environment variable `HIPSYCL_TARGETS=BACKEND:CAPABILITEIS` to select the device to build agains.  
+For example, to build an app for a Nvidia RTX 2070, with cuda capabilities 7.5
+```bash
+HIPSYCL_TARGETS=cuda:sm_70
+```
+Other backend are: `omp` for cpu code and `hip:ARCH` for amd gpu.  
+
+To compile an app, just use the hipSYCL compiler `syclcc`
+
+### DPC++
+
+To build an app using DPC++, you will have to use the clang compiler and select the appropriate triple.
+For example, to build a SYCL app for a Nvidia RTX 2070, with cuda capabilities 7.5
+```bash
+clang++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda -Xsycl-target-backend --offload_arch=75 <FILENAME>
+```
+where
+- *-fsycl* enables the SYCL implementation
+- *fsycl-targets=TRIPLE* specifies the target hardware.
+
+### Cmake integration
+Both DPC++ and hipSYCL can be used with CMake build system. A sample app that shows how to integrate them can be found [here](https://github.com/Luigi-Crisci/SYCL-cmake-sample-app)
