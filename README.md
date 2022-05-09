@@ -66,7 +66,7 @@ While you can easly check the CUDA capabilities for your device by checking your
 HipSYCL uses an environment variable `HIPSYCL_TARGETS=BACKEND:CAPABILITEIS` to select the device to build agains.  
 For example, to build an app for a Nvidia RTX 2070, with cuda capabilities 7.5
 ```bash
-HIPSYCL_TARGETS=cuda:sm_70
+HIPSYCL_TARGETS=cuda:sm_75
 ```
 Other backend are: `omp` for cpu code and `hip:ARCH` for amd gpu.  
 
