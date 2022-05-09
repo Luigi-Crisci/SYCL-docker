@@ -57,7 +57,7 @@ Do NOT enable both backend togheter as it could brick the container (Not tested,
 
 ## Building a SYCL app
 
-### Knowing our GPU capabilities
+### Knowing your GPU capability
 Each Nvidia GPU comes with a specific CUDA capabilities, which you need to specify when building a SYCL app using the CUDA backend.  
 While you can easly check the CUDA capabilities for your device by checking your architecture online, [here](https://gist.github.com/Luigi-Crisci/08b8f76355476a68d34737611984bf5c) you can find simple app that queries it for you.
 
