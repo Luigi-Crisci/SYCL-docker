@@ -90,9 +90,10 @@ RUN echo "Building DPCPP..." \
 	&& cd buildbot \
 	&& python3 configure.py --cuda -t release --cmake-opt='-DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs' \
 	&& python3 compile.py -j $(nproc) \
+	&& cd / \
 	&& mkdir dpcpp \
-	&& mv llvm-2021-12/build/install llvm-2021-12/build/install_manifest* dpcpp \
-	&& rm -rf 2021-12.tar.gz llvm-2021-12
+	&& mv /llvm-2021-12/build/install /llvm-2021-12/build/install_manifest* dpcpp \
+	&& rm -rf /2021-12.tar.gz /llvm-2021-12
 # Fix install files
 COPY sed_dpcpp.sh /dpcpp/	
 RUN  cd dpcpp && chmod +x sed_dpcpp.sh && ./sed_dpcpp.sh && rm sed_dpcpp.sh
