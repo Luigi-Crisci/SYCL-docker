@@ -10,7 +10,7 @@ Contains:
 ## Build
 A pre built image can be found in DockerHub. To get it, type
 ```bash
-docker pull luigicrisci/sycl_cuda11.4
+docker pull luigicrisci/sycl_cuda:11.4
 ```
 
 If you want to build the image by yourself, type
