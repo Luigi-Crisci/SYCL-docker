@@ -1,0 +1,86 @@
+FROM ubuntu:22.04
+
+RUN apt-get -u update \
+	&& apt-get -qq upgrade \
+	# Setup Kitware repo for the latest cmake available:
+	&& apt-get -qq install \
+	apt-transport-https ca-certificates gnupg software-properties-common wget \
+	cmake \
+	ca-certificates \
+	build-essential \
+	python3 \
+	ninja-build \
+	ccache \
+	xz-utils \
+	curl \
+	git \
+	bzip2 \
+	lzma \
+	xz-utils \
+	apt-utils \
+	vim
+
+# Install llvm 15 with all dependencies
+ADD install_llvm.sh /
+RUN chmod +x install_llvm.sh \
+	&& ./install_llvm.sh \
+	&& rm -rf install_llvm.sh /root/git 
+
+RUN apt install --fix-missing
+#Install boost dependecies
+RUN apt -u update \
+	&& apt install -y autotools-dev libicu-dev libbz2-dev libcurl4-openssl-dev libexpat-dev libgmp-dev libmpfr-dev libssl-dev libxml2-dev libz-dev \
+	zlib1g-dev libopenmpi-dev \
+	libicu-dev \
+	python3-dev
+
+# Install boost
+RUN echo "Installing Boost..." \
+	&& wget -q https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz  \
+	&& tar -xf boost_1_81_0.tar.gz \
+	&& cd boost_1_81_0 \
+	&& ./bootstrap.sh --with-libraries=all \
+	&& ./b2 -j $(grep -c ^processor /proc/cpuinfo) -q install \ 
+	&& cd .. && rm -rf boost_1_81_0.tar.gz boost_1_81_0
+
+# Install Cuda-12
+RUN echo "Installing Cuda..." \
+	&& wget https://developer.download.nvidia.com/compute/cuda/12.0.0/local_installers/cuda_12.0.0_525.60.13_linux.run \
+	&& chmod +x cuda_12.0.0_525.60.13_linux.run \
+	&& ./cuda_12.0.0_525.60.13_linux.run --toolkit --silent --toolkitpath=/usr/local/cuda-12.0 \
+	&& rm -rf cuda_12.0.0_525.60.13_linux.run
+
+RUN ls -R /root/deps
+# Install hipSYCL
+RUN echo "Building hipSYCL..." \
+	&& git clone https://github.com/illuhad/hipSYCL \
+	&& cd hipSYCL \
+	&& git checkout \
+	&& mkdir build \
+	&& cd build \
+	&& cmake .. -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR=/root/deps/llvm-15.0.6/lib/cmake/llvm/ \
+	-DCLANG_EXECUTABLE_PATH=/root/deps/llvm-15.0.6/bin/clang++ \
+	-DCLANG_INCLUDE_PATH=/root/deps/llvm-15.0.6/lib/clang/15.0.6/include/  \
+	&& make -j $(grep -c ^processor /proc/cpuinfo) all 
+
+RUN echo "Building DPCPP..." \
+	&& wget -q https://github.com/intel/llvm/archive/refs/tags/2022-09.tar.gz \
+	&& tar -xzf 2022-09.tar.gz \
+	&& cd llvm-2022-09 \
+	&& cd buildbot \
+	&& python3 configure.py --cuda -t release --cmake-opt='-DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs' \
+	&& python3 compile.py -j $(nproc) \
+	&& cd / \
+	&& mkdir dpcpp \
+	&& mv /llvm-2022-09/build/install /llvm-2022-09/build/install_manifest* dpcpp \
+	&& rm -rf /2022-09.tar.gz /llvm-2022-09
+# Fix install files
+COPY sed_dpcpp.sh /dpcpp/	
+RUN  cd dpcpp && chmod +x sed_dpcpp.sh && ./sed_dpcpp.sh && rm sed_dpcpp.sh
+
+ADD env.sh /root/
+ADD manage_hipsycl.sh /root/
+ADD manage_dpcpp.sh /root/
+
+ENV PATH=/usr/local/cuda/bin:/usr/local/cuda/nvvm/bin:$PATH
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/nvvm/lib64:$LD_LIBRARY_PATH
